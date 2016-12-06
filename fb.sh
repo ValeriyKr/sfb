@@ -1,5 +1,31 @@
 #!/usr/bin/env bash
-# Made by Valeriy Kireev
+#
+# Made by Valeriy Kireev <valeriykireev@gmail.com>, 2016
+#
+# Use and modify code freely.
+# Leave my name here, please.
+#
+# fb -- Flappy Bird clone written in GNU sed.
+# 
+# Implemented:
+#  * Collisions;
+#  * Level generation;
+#  * Column's movement;
+#  * User's input handling;
+#  * Score counting.
+#
+# Not implemented:
+#  * Bird's movement;
+#  * Level randomization;
+#  * Background music (?)
+# 
+# Move up with `k` button. No more movements implemented. It's original way,
+#
+# Problems:
+#  * `read` on Solaris can't take floating-point timeout (-t) argument. 
+#    Setting it to 1 second makes game slowly. TODO: Find way to fix it.
+#  * On Linux you have to put `gsed` binary (or link to GNU sed) in $PATH.
+#
 
 field="[======================================]
 [..............................========]
@@ -23,8 +49,6 @@ field="[======================================]
 [======================================]
 Score: 0"
 
-bird_level=11
-bird=0
 running=1
 while [ "1" == "${running}" ]
 do
