@@ -29,6 +29,13 @@
 #  * Colorized version lags on Solaris (network connection?)
 #
 
+uname=`uname`
+if [ "$uname" != "SunOS" ]
+then
+    ln -s `which sed` ./gsed
+    export PATH=.:"$PATH"
+fi
+
 field="[======================================]
 [..............................========]
 [..............................========]
