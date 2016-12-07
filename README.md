@@ -1,5 +1,4 @@
 # sfb
----
 `sfb` -- Flappy Bird clone written in GNU sed.
 
 Implemented:

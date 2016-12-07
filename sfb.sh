@@ -24,16 +24,38 @@
 #
 # Problems:
 #  * `read` on Solaris can't take floating-point timeout (-t) argument. 
-#    Setting it to 1 second makes game slowly. TODO: Find way to fix it.
+#    Setting it to 1 second makes game slowly.
 #  * On Linux you have to put `gsed` binary (or link to GNU sed) in $PATH.
+#    Fixed.
 #  * Colorized version lags on Solaris (network connection?)
+#    Fixed with double buffering.
 #
 
-uname=`uname`
-if [ "$uname" != "SunOS" ]
+export PATH=.:"$PATH"
+which gsed 2>&- 1>/dev/null
+status=$?
+if [ $status -ne 0 ]
 then
     ln -s `which sed` ./gsed
-    export PATH=.:"$PATH"
+fi
+
+gsed -r '' /dev/null
+status=$?
+if [ $status -ne 0 ]
+then
+    echo "Your 'sed' implementation isn't compatible with GNU sed well."
+    exit 1
+fi
+
+timeout=0.5
+status=`read -s -t 0.1 -n1 key 2>&1`
+if [ "$status" != '' ]
+then
+    timeout=1
+    echo "Your 'read' doesn't support floating-point timeout."
+    echo "It will be set to '1'"
+    echo "Game will be slowly"
+    sleep 3
 fi
 
 field="[======================================]
@@ -69,7 +91,12 @@ colorize() {
     Purple=$esc'[0;35m'        # Purple
     Cyan=$esc'[0;36m'          # Cyan
     White=$esc'[1;37m'         # White
-    gsed -r \
+    while read line
+    do
+        buffer="$buffer$line
+"
+    done
+    buffer=`echo "$buffer" | gsed -r \
     "
         2,19 {
             s/^(\[.*)([0-9])(.*)/\1${Green}\2${Default}\3/
@@ -91,17 +118,20 @@ colorize() {
             s/^(\[)(={2})(.*)$/\1${Blue}\2${Default}\3/
             s/^(\[)(={1})(.*)$/\1${Black}\2${Default}\3/
         }
-        s/(Score: )([0-9])$/${White}\1${Green}\2${Default}/
-        s/(Score: )([12][0-9])$/${White}\1${Yellow}\2${Default}/
-        s/(Score: )([0-9]{2,})$/${White}\1${Red}\2${Default}/
+        21 {
+            s/^(.* )([0-9])$/${White}\1${Green}\2${Default}/
+            s/^(.* )([12][0-9])$/${White}\1${Yellow}\2${Default}/
+            s/^(.* )([0-9]{2,})$/${White}\1${Red}\2${Default}/
+        }
         :s
         s/\./ /
         ts
-    "
+    "`
+    echo "$buffer"
 }
 
 running=1
-while [ "1" == "${running}" ]
+while [ 1 -eq $running ]
 do
     clear
     echo "${field}" | colorize
@@ -112,12 +142,12 @@ do
         : begin
         /^\[.{11}[.=]=/ {
             N
-            /\n\[[.]{11}[1-9]/ b fail
+            /\n\[[=.]{11}[1-9]/ b fail
             s/^.*\n(.*)$/\1/
             t begin
         }
-        /^\[[.]{11}[0-9]=/ b fail
-        /^\[[.]{11}0/ {
+        /^\[[=.]{11}[0-9]=/ b fail
+        /^\[[=.]{11}0/ {
             N
             s/\n.{12}=/&/
             t fail
@@ -125,6 +155,7 @@ do
         b not_fail
         : fail
         s/^.*$/0/p
+        q
         : not_fail
         $ s/^.*$/1/p
     '`
@@ -217,7 +248,7 @@ do
     '`
     key=''
     # Timeout = 0.5 for Linux. s/0\.5/1/ for Solaris.
-    read -s -t 0.5 -n1 key
+    read -s -t $timeout -n1 key
     field=`echo -e "${key}\n${field}" | gsed -r \
     '
         1 {
