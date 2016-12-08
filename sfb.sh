@@ -91,6 +91,8 @@ colorize() {
     Purple=$esc'[0;35m'        # Purple
     Cyan=$esc'[0;36m'          # Cyan
     White=$esc'[1;37m'         # White
+
+    # Read all lines for a double buffering.
     while read line
     do
         buffer="$buffer$line
@@ -202,6 +204,7 @@ do
 
     field=`echo "$field" | gsed -r \
     '
+        # Columns
         /^\[/{
             s/\.(={1,7}\])$/=\1/
             t border
@@ -211,6 +214,7 @@ do
             s/^\[=\./[../
             s/^(\[={1,7})=([^=].*)/\1.\2/
         }
+        # Generation of new columns
         2,7 {
             /^\[={6}.*\]/ s/\.\]/=]/
         }
@@ -247,10 +251,10 @@ do
         : inc_end
     '`
     key=''
-    # Timeout = 0.5 for Linux. s/0\.5/1/ for Solaris.
     read -s -t $timeout -n1 key
     field=`echo -e "${key}\n${field}" | gsed -r \
     '
+        # Checks "k" is pressed and sets bird"s direction to top
         1 {
             /k/! b print_all
             h
