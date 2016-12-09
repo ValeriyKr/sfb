@@ -132,10 +132,11 @@ colorize() {
     echo "$buffer"
 }
 
+clear
 running=1
 while [ 1 -eq $running ]
 do
-    clear
+    tput cup 0 0 
     echo "${field}" | colorize
     #echo "$field"
     running=`echo "$field" | gsed -nr \
