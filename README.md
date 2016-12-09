@@ -26,7 +26,7 @@ Move up with `k` button. No more movements implemented. It's original way,
 ---
 Problems:
  * `read` on Solaris can't take floating-point timeout (-t) argument.
-   Setting it to 1 second makes game slowly. TODO: Find way to fix it.
+   Setting it to 1 second makes game slowly.
  * On Linux you have to put `gsed` binary (or link to GNU sed) in $PATH.
 
    Fixed.

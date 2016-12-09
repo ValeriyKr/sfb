@@ -101,7 +101,7 @@ colorize() {
     buffer=`echo "$buffer" | gsed -r \
     "
         2,19 {
-            s/^(\[.*)([0-9])(.*)/\1${Green}\2${Default}\3/
+            s/^(\[.*)(.[0-9])(.*)/\1${Green}*>${Default}\3/
 
             s/^(\[.*)(={8})(.*)$/\1${Yellow}\2${Default}\3/
 
