@@ -31,6 +31,24 @@
 #    Fixed with double buffering.
 #
 
+colorize="cat"
+if [ $# -ne 1 ]
+then
+    echo -e "\tUsage: $0 [none|light|full]"
+    echo ""
+    echo -e "\tArgument sets colorizing model. If game lags with full"
+    echo -e "\tcolorizing, try to set it lighter"
+    exit
+fi
+
+if [ "$1" == "light" ]
+then
+    colorize=colorize_light
+elif [ "$1" == "full" ]
+then
+    colorize=colorize_full
+fi
+
 export PATH=.:"$PATH"
 which gsed 2>&- 1>/dev/null
 status=$?
@@ -80,18 +98,31 @@ field="[======================================]
 [======================================]
 Score: 0"
 
-colorize() {
-    esc=$(printf '\033')
-    Default=$esc'[0m'          # Text Reset
-    Black=$esc'\[0;30m'        # Black
-    Red=$esc'\[0;31m'          # Red
-    Green=$esc'\[0;32m'        # Green
-    Yellow=$esc'\[0;33m'       # Yellow
-    Blue=$esc'[0;34m'          # Blue
-    Purple=$esc'[0;35m'        # Purple
-    Cyan=$esc'[0;36m'          # Cyan
-    White=$esc'[1;37m'         # White
+esc=$(printf '\033')
+Default=$esc'[0m'          # Text Reset
+Black=$esc'\[0;30m'        # Black
+Red=$esc'\[0;31m'          # Red
+Green=$esc'\[0;32m'        # Green
+Yellow=$esc'\[0;33m'       # Yellow
+Blue=$esc'[0;34m'          # Blue
+Purple=$esc'[0;35m'        # Purple
+Cyan=$esc'[0;36m'          # Cyan
+White=$esc'[1;37m'         # White
+BBlack=$esc'\[0;40m'        # Black
+BRed=$esc'\[0;41m'          # Red
+BGreen=$esc'\[0;42m'        # Green
+BYellow=$esc'\[0;43m'       # Yellow
+BBlue=$esc'[0;44m'          # Blue
+BPurple=$esc'[0;45m'        # Purple
+BCyan=$esc'[0;46m'          # Cyan
+BWhite=$esc'[1;47m'         # White
+BirdSkyB=$esc'[91;46m'
+BirdSkyF=$esc'[1;93;46m'
+BirdGrsB=$esc'[1;91;42m'
+BirdGrsF=$esc'[93;42m'
+Sun=$esc'[0;93;103m'
 
+colorize_light() {
     # Read all lines for a double buffering.
     while read line
     do
@@ -104,30 +135,103 @@ colorize() {
             s/^(\[.*)(.[0-9])(.*)/\1${Green}*>${Default}\3/
 
             s/^(\[.*)(={8})(.*)$/\1${Yellow}\2${Default}\3/
+            tn
 
-            s/(\.)(={7})(\])$/\1${Red}\2${Default}\3/
-            s/(\.)(={6})(\])$/\1${Green}\2${Default}\3/
-            s/(\.)(={5})(\])$/\1${White}\2${Default}\3/
-            s/(\.)(={4})(\])$/\1${Purple}\2${Default}\3/
-            s/(\.)(={3})(\])$/\1${Cyan}\2${Default}\3/
-            s/(\.)(={2})(\])$/\1${Blue}\2${Default}\3/
-            s/(\.)(={1})(\])$/\1${Black}\2${Default}\3/
+            s/([^=])(={7})(\])$/\1${Red}\2${Default}\3/
+            tn
+            s/([^=])(={6})(\])$/\1${Green}\2${Default}\3/
+            tn
+            s/([^=])(={5})(\])$/\1${White}\2${Default}\3/
+            tn
+            s/([^=])(={4})(\])$/\1${Purple}\2${Default}\3/
+            tn
+            s/([^=])(={3})(\])$/\1${Cyan}\2${Default}\3/
+            tn
+            s/([^=])(={2})(\])$/\1${Blue}\2${Default}\3/
+            tn
+            s/([^=])(={1})(\])$/\1${Black}\2${Default}\3/
+            :n
             s/^(\[)(={7})(.*)$/\1${Red}\2${Default}\3/
+            te
             s/^(\[)(={6})(.*)$/\1${Green}\2${Default}\3/
+            te
             s/^(\[)(={5})(.*)$/\1${White}\2${Default}\3/
+            te
             s/^(\[)(={4})(.*)$/\1${Purple}\2${Default}\3/
+            te
             s/^(\[)(={3})(.*)$/\1${Cyan}\2${Default}\3/
+            te
             s/^(\[)(={2})(.*)$/\1${Blue}\2${Default}\3/
+            te
             s/^(\[)(={1})(.*)$/\1${Black}\2${Default}\3/
+            :e
+        }
+        21 {
+            s/^(.* )([0-9])$/${White}\1${Green}\2${Default}/
+            ty
+            s/^(.* )([12][0-9])$/${White}\1${Yellow}\2${Default}/
+            s/^(.* )([0-9]{2,})$/${White}\1${Red}\2${Default}/
+            :y
+        }
+        y/./ /
+    "`
+    echo "$buffer"
+}
+
+colorize_full() {
+    # Read all lines for a double buffering.
+    while read line
+    do
+        buffer="$buffer$line
+"
+    done
+    buffer=`echo "$buffer" | gsed -r \
+    "
+        2,19 {
+            3 {
+                s/\.(\...\])/${Sun}*${Default}\1/
+            }
+            4 {
+                s/\...(\..\])/${Sun}***${Default}\1/
+            }
+            5 {
+                s/\.(\...\])/${Sun}*${Default}\1/
+            }
+
+            2,9 {
+                s/^(\[.*)(.[.=][0-9])(.*)/\1${BirdSkyB}(*${BirdSkyF}>${Default}\3/
+                s/\./${BCyan}.${Default}/g
+            }
+            10,19 {
+                s/^(\[.*)(..[0-9])(.*)/\1${BirdGrsB}(*${BirdGrsF}>${Default}\3/
+                s/\./${BGreen}.${Default}/g
+            }
+
+            s/^(\[.*)(={8})(.*)$/\1${BYellow}\2${Default}\3/
+
+            s/([^=])(={7})(\])$/\1${BRed}\2${Default}\3/
+            s/([^=])(={6})(\])$/\1${BGreen}\2${Default}\3/
+            s/([^=])(={5})(\])$/\1${BWhite}\2${Default}\3/
+            s/([^=])(={4})(\])$/\1${BPurple}\2${Default}\3/
+            s/([^=])(={3})(\])$/\1${BCyan}\2${Default}\3/
+            s/([^=])(={2})(\])$/\1${BBlue}\2${Default}\3/
+            s/([^=])(={1})(\])$/\1${BBlack}\2${Default}\3/
+            s/^(\[)(={7})(.*)$/\1${BRed}\2${Default}\3/
+            s/^(\[)(={6})(.*)$/\1${BGreen}\2${Default}\3/
+            s/^(\[)(={5})(.*)$/\1${BWhite}\2${Default}\3/
+            s/^(\[)(={4})(.*)$/\1${BPurple}\2${Default}\3/
+            s/^(\[)(={3})(.*)$/\1${BCyan}\2${Default}\3/
+            s/^(\[)(={2})(.*)$/\1${BBlue}\2${Default}\3/
+            s/^(\[)(={1})(.*)$/\1${BBlack}\2${Default}\3/
+            y/=/ /
         }
         21 {
             s/^(.* )([0-9])$/${White}\1${Green}\2${Default}/
             s/^(.* )([12][0-9])$/${White}\1${Yellow}\2${Default}/
             s/^(.* )([0-9]{2,})$/${White}\1${Red}\2${Default}/
         }
-        :s
-        s/\./ /
-        ts
+        #s/\*\./${Sun}*.${Default}/
+        y/./ /
     "`
     echo "$buffer"
 }
@@ -137,7 +241,7 @@ running=1
 while [ 1 -eq $running ]
 do
     tput cup 0 0 
-    echo "${field}" | colorize
+    echo "${field}" | $colorize
     #echo "$field"
     running=`echo "$field" | gsed -nr \
     '
