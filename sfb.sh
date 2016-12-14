@@ -49,15 +49,17 @@ then
     colorize=colorize_full
 fi
 
-export PATH=.:"$PATH"
+sed=
 which gsed 2>&- 1>/dev/null
 status=$?
 if [ $status -ne 0 ]
 then
-    ln -s `which sed` ./gsed
+    sed=`which sed`
+else
+    sed=`which gsed`
 fi
 
-gsed -r '' /dev/null
+$sed -r '' /dev/null
 status=$?
 if [ $status -ne 0 ]
 then
@@ -129,7 +131,7 @@ colorize_light() {
         buffer="$buffer$line
 "
     done
-    buffer=`echo "$buffer" | gsed -r \
+    buffer=`echo "$buffer" | $sed -r \
     "
         2,19 {
             s/^(\[.*)(.[0-9])(.*)/\1${Green}*>${Default}\3/
@@ -185,7 +187,7 @@ colorize_full() {
         buffer="$buffer$line
 "
     done
-    buffer=`echo "$buffer" | gsed -r \
+    buffer=`echo "$buffer" | $sed -r \
     "
         2,19 {
             3 {
@@ -243,7 +245,7 @@ do
     tput cup 0 0 
     echo "${field}" | $colorize
     #echo "$field"
-    running=`echo "$field" | gsed -nr \
+    running=`echo "$field" | $sed -nr \
     '
         # Collisions
         : begin
@@ -267,7 +269,7 @@ do
         $ s/^.*$/1/p
     '`
 
-    field=`echo "$field" | gsed -r \
+    field=`echo "$field" | $sed -r \
     '
         # Bird flying
         /^\[.{11}0/ {
@@ -307,7 +309,7 @@ do
         }
     '`
 
-    field=`echo "$field" | gsed -r \
+    field=`echo "$field" | $sed -r \
     '
         # Columns
         /^\[/{
@@ -357,7 +359,7 @@ do
     '`
     key=''
     read -s -t $timeout -n1 key
-    field=`echo -e "${key}\n${field}" | gsed -r \
+    field=`echo -e "${key}\n${field}" | $sed -r \
     '
         # Checks "k" is pressed and sets bird"s direction to top
         1 {
