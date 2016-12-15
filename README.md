@@ -1,6 +1,8 @@
 # sfb
 `sfb` -- Flappy Bird clone written in GNU sed.
 
+![screenshot](https://raw.githubusercontent.com/ValeriyKr/sfb/master/scr.png)
+
 Implemented:
  * Collisions;
  * Level generation;
