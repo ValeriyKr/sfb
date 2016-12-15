@@ -52,7 +52,10 @@ fi
 sed=
 which gsed 2>&- 1>/dev/null
 status=$?
-if [ $status -ne 0 ]
+if [ $status -eq 127 ] # "which: command not found"
+then
+    sed=sed
+elif [ $status -ne 0 ]
 then
     sed=`which sed`
 else
