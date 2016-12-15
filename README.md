@@ -1,7 +1,7 @@
 # sfb
 `sfb` -- Flappy Bird clone written in GNU sed.
 
-![screenshot](https://raw.githubusercontent.com/ValeriyKr/sfb/master/scr.png)
+![screenshot](https://raw.githubusercontent.com/ValeriyKr/sfb/master/screenshot.png)
 
 Implemented:
  * Collisions;
