@@ -58,9 +58,9 @@ then
     sed=sed
 elif [ $status -ne 0 ]
 then
-    sed=`which sed`
+    sed=$(which sed)
 else
-    sed=`which gsed`
+    sed=$(which gsed)
 fi
 
 $sed -r '' /dev/null
@@ -72,7 +72,7 @@ then
 fi
 
 timeout=0.5
-status=`read -s -t 0.1 -n1 key 2>&1`
+status=$(read -s -t 0.1 -n1 key 2>&1)
 if [ "$status" != '' ]
 then
     timeout=1
@@ -135,7 +135,7 @@ colorize_light() {
         buffer="$buffer$line
 "
     done
-    buffer=`echo "$buffer" | $sed -r \
+    buffer=$(echo "$buffer" | $sed -r \
     "
         2,19 {
             s/^(\[.*)(.[0-9])(.*)/\1${Green}*>${Default}\3/
@@ -180,7 +180,7 @@ colorize_light() {
             :y
         }
         y/./ /
-    "`
+    ")
     echo "$buffer"
 }
 
@@ -191,7 +191,7 @@ colorize_full() {
         buffer="$buffer$line
 "
     done
-    buffer=`echo "$buffer" | $sed -r \
+    buffer=$(echo "$buffer" | $sed -r \
     "
         2,19 {
             3 {
@@ -238,7 +238,7 @@ colorize_full() {
         }
         #s/\*\./${Sun}*.${Default}/
         y/./ /
-    "`
+    ")
     echo "$buffer"
 }
 
@@ -249,7 +249,7 @@ do
     tput cup 0 0 
     echo "${field}" | $colorize
     #echo "$field"
-    running=`echo "$field" | $sed -nr \
+    running=$(echo "$field" | $sed -nr \
     '
         # Collisions
         : begin
@@ -271,9 +271,9 @@ do
         q
         : not_fail
         $ s/^.*$/1/p
-    '`
+    ')
 
-    field=`echo "$field" | $sed -r \
+    field=$(echo "$field" | $sed -r \
     '
         # Bird flying
         /^\[.{11}0/ {
@@ -311,9 +311,9 @@ do
                 s/^(\[[.=]{11})(.)(.*)([1-9])/\1\4\3\2/
             }
         }
-    '`
+    ')
 
-    field=`echo "$field" | $sed -r \
+    field=$(echo "$field" | $sed -r \
     '
         # Columns
         /^\[/{
@@ -360,10 +360,10 @@ do
             t inc_fin
         }
         : inc_end
-    '`
+    ')
     key=''
     read -s -t $timeout -n1 key
-    field=`echo -e "${key}\n${field}" | $sed -r \
+    field=$(echo -e "${key}\n${field}" | $sed -r \
     '
         # Checks "k" is pressed and sets bird"s direction to top
         1 {
@@ -386,6 +386,6 @@ do
             N
             s/^.*\n(.*)$/\1/
         }
-    '`
+    ')
 done
 echo "Game Over"
