@@ -14,7 +14,8 @@
 #  * User's input handling;
 #  * Score counting;
 #  * Colorized output;
-#  * Bird's movement.
+#  * Bird's movement;
+#  * Color scheme choosing.
 #
 # Not implemented:
 #  * Level randomization;
@@ -37,7 +38,7 @@ then
     echo -e "\tUsage: $0 [none|light|full]"
     echo ""
     echo -e "\tArgument sets colorizing model. If game lags with full"
-    echo -e "\tcolorizing, try to set it lighter"
+    echo -e "\tcolorizing, try to set it lighter."
     exit
 fi
 
