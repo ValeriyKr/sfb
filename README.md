@@ -6,11 +6,11 @@
 Implemented:
  * Collisions;
  * Level generation;
- * Column's movement;
+ * Columns' movement;
  * User's input handling;
- * Score counting;
- * Colorized output;
- * Color scheme choosing;
+ * Score count;
+ * Colorful output;
+ * Choice of the color scheme;
  * Bird's movement.
 
 Not implemented:
@@ -24,13 +24,13 @@ $ git clone https://github.com/ValeriyKr/sfb.git
 $ cd sfb
 $ ./sfb.sh
 ```
-Move up with `k` button. No more movements implemented. It's original way,
+Move up with `k` button. No more movements implemented. It's the original way,
 
 There are three color schemes, `none`, `light` and `full`.
 You should choose one when you start playing by passing it as a command-line argument.
  * `none` is internal representation of field. It's ugly.
  * `light` can be used if `full` is too bright for you or if it lags.
-   I felt delays in remote system and used this.
+   I was experiencing delays in remote system and used this.
  * `full` is the prettiest.
    It is recommended for default playing.
 
