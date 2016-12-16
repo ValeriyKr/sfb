@@ -2,8 +2,8 @@
 #
 # Made by Valeriy Kireev <valeriykireev@gmail.com>, 2016
 #
-# Use and modify code freely.
-# Leave my name here, please.
+# sfb is licensed under the terms of the MIT license.
+# See LICENSE for details.
 #
 # sfb -- Flappy Bird clone written in GNU sed.
 # 
