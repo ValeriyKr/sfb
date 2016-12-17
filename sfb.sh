@@ -35,7 +35,7 @@
 colorize="cat"
 if [ $# -ne 1 ]
 then
-    echo -e "\tUsage: $0 [none|light|full]"
+    echo -e "\tUsage: $0 <none|light|full>"
     echo ""
     echo -e "\tArgument sets colorizing model. If game lags with full"
     echo -e "\tcolorizing, try to set it lighter."
@@ -140,6 +140,8 @@ colorize_light() {
         2,19 {
             s/^(\[.*)(.[0-9])(.*)/\1${Green}*>${Default}\3/
 
+            t rst
+            : rst
             s/^(\[.*)(={8})(.*)$/\1${Yellow}\2${Default}\3/
             tn
 
@@ -248,7 +250,6 @@ while [ 1 -eq $running ]
 do
     tput cup 0 0 
     echo "${field}" | $colorize
-    #echo "$field"
     running=$(echo "$field" | $sed -nr \
     '
         # Collisions
@@ -285,7 +286,6 @@ do
             N
             $ b
             bn
-            b
         }
 
         /^\[.{12}/ {
@@ -308,7 +308,7 @@ do
                 b falling
             }
             /\n\[[.=]{11}[1-9]/ {
-                s/^(\[[.=]{11})(.)(.*)([1-9])/\1\4\3\2/
+                s/^(\[[.=]{11}).(.*)([1-9])/\1\3\2./
             }
         }
     ')
@@ -319,7 +319,7 @@ do
         /^\[/{
             s/\.(={1,7}\])$/=\1/
             t border
-            s/\.(=+)([.1-9])/\1.\2/
+            s/\.(=+)([.0-9])/\1.\2/
             s/\.(=+)\]/\1.]/
             : border
             s/^\[=\./[../
