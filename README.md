@@ -39,8 +39,11 @@ Problems:
  * `read` on Solaris can't take floating-point timeout (-t) argument.
    Setting it to 1 second makes game slowly.
  * On Linux you have to put `gsed` binary (or link to GNU sed) in $PATH.
-
+   
    Fixed.
  * Colorized version lags on Solaris (network connection?)
-
+   
    Fixed with double buffering.
+ * OS X users have a problem with playing because they doesn't have GNU sed.
+   
+   [Discussion](https://github.com/ValeriyKr/sfb/issues/3)
