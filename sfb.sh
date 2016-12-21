@@ -201,15 +201,10 @@ colorize_full() {
     printf "%s\n" "$buffer"
 }
 
-clear
-running=1
-while [ 1 -eq $running ]
-do
-    tput clear
-    printf "%s\n" "$field" | $colorize
-    running=$(printf "%s\n" "$field" | sed -n \
+handle_collisions() {
+  # Collisions
+  sed -n \
     '
-      # Collisions
       : begin
       /^\[.\{11\}[.=]=/ {
           N
@@ -229,11 +224,13 @@ do
       q
       : not_fail
       $ s/^.*$/1/p
-    ')
-
-    field=$(printf "%s\n" "$field" | sed \
     '
-      # Bird flying
+}
+
+handle_flying() {
+  # Bird flying
+  sed \
+    '
       /^\[.\{11\}0/ {
           : falling
           s/0/./
@@ -268,11 +265,13 @@ do
               s/^\(\[[.=]\{11\}\).\(.*\)\([1-9]\)/\1\3\2./
           }
       }
-    ')
-
-    field=$(printf "%s\n" "$field" | sed \
     '
-      # Columns
+}
+
+handle_columns() {
+  # Columns
+  sed \
+    '
       /^\[/ {
           s/\.\(=\{1,7\}\]\)$/=\1/
           t border
@@ -317,19 +316,13 @@ do
           t inc_fin
       }
       : inc_end
-    ')
-
-    old_stty="$(stty -g)"
-    stty -icanon raw -echo min 0 time "$timeout" ignbrk -brkint -ixon isig
-
-    read -r key
-
-    # shellcheck disable=SC2086
-    stty $old_stty
-
-    field=$(printf "%s\n%s\n" "$key" "$field" | sed \
     '
-      # Checks "k" is pressed and sets bird"s direction to top
+}
+
+handle_keypress() {
+  # Checks 'k' is pressed and sets bird's direction to top
+  sed \
+    '
       1 {
           /k/! b print_all
           h
@@ -350,6 +343,29 @@ do
           N
           s/^.*\n\(.*\)$/\1/
       }
-    ')
+    '
+}
+
+clear
+running=1
+while [ 1 -eq $running ]
+do
+    output="$(printf "%s\n" "$field" | $colorize)"
+    tput clear
+    printf "%s\n" "$output"
+
+    running=$(printf "%s\n" "$field" | handle_collisions)
+
+    field=$(printf "%s\n" "$field" | handle_flying | handle_columns)
+
+    old_stty="$(stty -g)"
+    stty -icanon raw -echo min 0 time "$timeout" ignbrk -brkint -ixon isig
+
+    read -r key
+
+    # shellcheck disable=SC2086
+    stty $old_stty
+
+    field=$(printf "%s\n%s\n" "$key" "$field" | handle_keypress)
 done
 echo "Game Over"
