@@ -36,9 +36,6 @@ You should choose one when you start playing by passing it as a command-line arg
 
 ---
 Problems:
- * On Linux you have to put `gsed` binary (or link to GNU sed) in $PATH.
-   
-   Fixed.
  * Colorized version lags on Solaris (network connection?)
    
    Fixed with double buffering.
