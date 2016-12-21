@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 #
 # Made by Valeriy Kireev <valeriykireev@gmail.com>, 2016
 #
@@ -6,7 +6,7 @@
 # See LICENSE for details.
 #
 # sfb -- Flappy Bird clone written in GNU sed.
-# 
+#
 # Implemented:
 #  * Collisions;
 #  * Level generation;
@@ -20,12 +20,10 @@
 # Not implemented:
 #  * Level randomization;
 #  * Background music (?)
-# 
+#
 # Move up with `k` button. No more movements implemented. It's original way,
 #
 # Problems:
-#  * `read` on Solaris can't take floating-point timeout (-t) argument. 
-#    Setting it to 1 second makes game slowly.
 #  * On Linux you have to put `gsed` binary (or link to GNU sed) in $PATH.
 #    Fixed.
 #  * Colorized version lags on Solaris (network connection?)
@@ -35,17 +33,16 @@
 colorize="cat"
 if [ $# -ne 1 ]
 then
-    echo -e "\tUsage: $0 <none|light|full>"
-    echo ""
-    echo -e "\tArgument sets colorizing model. If game lags with full"
-    echo -e "\tcolorizing, try to set it lighter."
+    printf  "\tUsage: %s <none|light|full>\n\n" "$0"
+    printf  "\tArgument sets colorizing model. If game lags with full\n"
+    printf  "\tcolorizing, try to set it lighter.\n"
     exit
 fi
 
-if [ "$1" == "light" ]
+if [ "$1" = "light" ]
 then
     colorize=colorize_light
-elif [ "$1" == "full" ]
+elif [ "$1" = "full" ]
 then
     colorize=colorize_full
 fi
@@ -71,16 +68,7 @@ then
     exit 1
 fi
 
-timeout=0.5
-status=$(read -s -t 0.1 -n1 key 2>&1)
-if [ "$status" != '' ]
-then
-    timeout=1
-    echo "Your 'read' doesn't support floating-point timeout."
-    echo "It will be set to '1'"
-    echo "Game will be slowly"
-    sleep 3
-fi
+timeout=5
 
 field="[======================================]
 [..............................========]
@@ -105,15 +93,15 @@ field="[======================================]
 Score: 0"
 
 esc=$(printf '\033')
-Default=$esc'[0m'          # Text Reset
-Black=$esc'\[0;30m'        # Black
-Red=$esc'\[0;31m'          # Red
-Green=$esc'\[0;32m'        # Green
-Yellow=$esc'\[0;33m'       # Yellow
-Blue=$esc'[0;34m'          # Blue
-Purple=$esc'[0;35m'        # Purple
-Cyan=$esc'[0;36m'          # Cyan
-White=$esc'[1;37m'         # White
+Default=$esc'[0m'           # Text Reset
+Black=$esc'\[0;30m'         # Black
+Red=$esc'\[0;31m'           # Red
+Green=$esc'\[0;32m'         # Green
+Yellow=$esc'\[0;33m'        # Yellow
+Blue=$esc'[0;34m'           # Blue
+Purple=$esc'[0;35m'         # Purple
+Cyan=$esc'[0;36m'           # Cyan
+White=$esc'[1;37m'          # White
 BBlack=$esc'\[0;40m'        # Black
 BRed=$esc'\[0;41m'          # Red
 BGreen=$esc'\[0;42m'        # Green
@@ -130,12 +118,8 @@ Sun=$esc'[0;93;103m'
 
 colorize_light() {
     # Read all lines for a double buffering.
-    while read line
-    do
-        buffer="$buffer$line
-"
-    done
-    buffer=$(echo "$buffer" | $sed -r \
+    buffer="$buffer$(cat)"
+    buffer=$(printf "%s\n" "$buffer" | $sed -r \
     "
         2,19 {
             s/^(\[.*)(.[0-9])(.*)/\1${Green}*>${Default}\3/
@@ -183,17 +167,13 @@ colorize_light() {
         }
         y/./ /
     ")
-    echo "$buffer"
+    printf "%s\n" "$buffer"
 }
 
 colorize_full() {
     # Read all lines for a double buffering.
-    while read line
-    do
-        buffer="$buffer$line
-"
-    done
-    buffer=$(echo "$buffer" | $sed -r \
+    buffer="$buffer$(cat)"
+    buffer=$(printf "%s\n" "$buffer" | $sed -r \
     "
         2,19 {
             3 {
@@ -241,16 +221,16 @@ colorize_full() {
         #s/\*\./${Sun}*.${Default}/
         y/./ /
     ")
-    echo "$buffer"
+    printf "%s\n" "$buffer"
 }
 
 clear
 running=1
 while [ 1 -eq $running ]
 do
-    tput cup 0 0 
-    echo "${field}" | $colorize
-    running=$(echo "$field" | $sed -nr \
+    tput clear
+    printf "%s\n" "$field" | $colorize
+    running=$(printf "%s\n" "$field" | $sed -nr \
     '
         # Collisions
         : begin
@@ -274,7 +254,7 @@ do
         $ s/^.*$/1/p
     ')
 
-    field=$(echo "$field" | $sed -r \
+    field=$(printf "%s\n" "$field" | $sed -r \
     '
         # Bird flying
         /^\[.{11}0/ {
@@ -313,7 +293,7 @@ do
         }
     ')
 
-    field=$(echo "$field" | $sed -r \
+    field=$(printf "%s\n" "$field" | $sed -r \
     '
         # Columns
         /^\[/{
@@ -361,9 +341,16 @@ do
         }
         : inc_end
     ')
-    key=''
-    read -s -t $timeout -n1 key
-    field=$(echo -e "${key}\n${field}" | $sed -r \
+
+    old_stty="$(stty -g)"
+    stty -icanon raw -echo min 0 time "$timeout" ignbrk -brkint -ixon isig
+
+    read -r key
+
+    # shellcheck disable=SC2086
+    stty $old_stty
+
+    field=$(printf "%s\n%s\n" "$key" "$field" | $sed -r \
     '
         # Checks "k" is pressed and sets bird"s direction to top
         1 {
