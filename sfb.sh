@@ -45,7 +45,7 @@ then
     colorize=colorize_full
 fi
 
-timeout=5
+timeout=4
 
 field="[======================================]
 [..............................========]
@@ -68,6 +68,10 @@ field="[======================================]
 [..............................========]
 [======================================]
 Score: 0"
+
+# Old terminal settings
+# shellcheck disable=SC2006
+old_stty=`stty -g`
 
 # shellcheck disable=SC2006
 esc=`printf '\033'`
@@ -204,7 +208,6 @@ colorize_full() {
             s/^\(.* \)\([12][0-9]\)$/${White}\1${Yellow}\2${Default}/
             s/^\(.* \)\([0-9]\{2,\}\)$/${White}\1${Red}\2${Default}/
         }
-        #s/\*\./${Sun}*.${Default}/
         y/./ /
     "`
     printf "%s\n" "$buffer"
@@ -299,7 +302,7 @@ handle_columns() {
       /^\[[.=]*[1-9].*/ {
           y/123456789/012345678/
       }
-      19{
+      19 {
           /^\[[.]\{3\}=/!b iend
           N
           N
@@ -352,6 +355,15 @@ handle_keypress() {
     '
 }
 
+game_over() {
+    # Restore tty and say "Good Bye" before exit
+    stty "${old_stty}"
+    printf "Game Over\n"
+    exit
+}
+
+trap "game_over" INT
+
 clear
 running=1
 while [ 1 -eq $running ]
@@ -368,7 +380,6 @@ do
     field=`printf "%s\n" "$field" | handle_flying | handle_columns`
 
     # shellcheck disable=SC2006
-    old_stty="`stty -g`"
     stty -icanon -echo min 0 time "$timeout"
 
     read key
@@ -379,4 +390,4 @@ do
     # shellcheck disable=SC2006,SC2154
     field=`printf "%s\n%s\n" "$key" "$field" | handle_keypress`
 done
-echo "Game Over"
+game_over
