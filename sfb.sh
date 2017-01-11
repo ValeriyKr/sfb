@@ -69,7 +69,8 @@ field="[======================================]
 [======================================]
 Score: 0"
 
-esc=$(printf '\033')
+# shellcheck disable=SC2006
+esc=`printf '\033'`
 Default=$esc'[0m'           # Text Reset
 Black=$esc'\[0;30m'         # Black
 Red=$esc'\[0;31m'           # Red
@@ -95,8 +96,12 @@ Sun=$esc'[0;93;103m'
 
 colorize_light() {
     # Read all lines for a double buffering.
-    buffer="$buffer$(cat)"
-    buffer=$(printf "%s\n" "$buffer" | sed \
+
+    # shellcheck disable=SC2006
+    buffer="$buffer`cat`"
+
+    # shellcheck disable=SC2006
+    buffer=`printf "%s\n" "$buffer" | sed \
     "
         2,19 {
             s/^\(\[.*\)\(.[0-9]\)\(.*\)/\1${Green}*>${Default}\3/
@@ -143,14 +148,18 @@ colorize_light() {
             :y
         }
         y/./ /
-    ")
+    "`
     printf "%s\n" "$buffer"
 }
 
 colorize_full() {
     # Read all lines for a double buffering.
-    buffer="$buffer$(cat)"
-    buffer=$(printf "%s\n" "$buffer" | sed \
+
+    # shellcheck disable=SC2006
+    buffer="$buffer`cat`"
+
+    # shellcheck disable=SC2006
+    buffer=`printf "%s\n" "$buffer" | sed \
     "
         2,19 {
             3 {
@@ -197,7 +206,7 @@ colorize_full() {
         }
         #s/\*\./${Sun}*.${Default}/
         y/./ /
-    ")
+    "`
     printf "%s\n" "$buffer"
 }
 
@@ -218,11 +227,11 @@ handle_collisions() {
           s/\n\[.\{12\}=/&/
           t fail
       }
-      b not_fail
+      b nfail
       : fail
       s/^.*$/0/p
       q
-      : not_fail
+      : nfail
       $ s/^.*$/1/p
     '
 }
@@ -281,20 +290,17 @@ handle_columns() {
           s/^\[=\./[../
           s/^\(\[=\{1,7\}\)=\([^=].*\)/\1.\2/
       }
-      # Generation of new columns
       2,7 {
           /^\[=\{6\}.*\]/ s/\.\]/=]/
       }
       14,19 {
           /^\[=\{6\}.*\]/ s/\.\]/=]/
       }
-      # Bird
       /^\[[.=]*[1-9].*/ {
           y/123456789/012345678/
       }
-      # Score
       19{
-          /^\[[.]\{3\}=/! b inc_end
+          /^\[[.]\{3\}=/!b iend
           N
           N
           t inc_9
@@ -315,7 +321,7 @@ handle_columns() {
           s/x/0/;
           t inc_fin
       }
-      : inc_end
+      : iend
     '
 }
 
@@ -324,21 +330,21 @@ handle_keypress() {
   sed \
     '
       1 {
-          /k/! b print_all
+          /k/!b pall
           h
           N
           s/^.*\n\(.*\)$/\1/
       }
       2,$ {
           x
-          /k/! bn
+          /k/!b n
           x
           s/^\(\[.\{11\}\)[0-9]/\15/
           b
           :n
           x
       }
-      : print_all
+      : pall
       1 {
           N
           s/^.*\n\(.*\)$/\1/
@@ -350,22 +356,27 @@ clear
 running=1
 while [ 1 -eq $running ]
 do
-    output="$(printf "%s\n" "$field" | $colorize)"
+    # shellcheck disable=SC2006
+    output="`printf "%s\n" "$field" | $colorize`"
     tput clear
     printf "%s\n" "$output"
 
-    running=$(printf "%s\n" "$field" | handle_collisions)
+    # shellcheck disable=SC2006
+    running=`printf "%s\n" "$field" | handle_collisions`
 
-    field=$(printf "%s\n" "$field" | handle_flying | handle_columns)
+    # shellcheck disable=SC2006
+    field=`printf "%s\n" "$field" | handle_flying | handle_columns`
 
-    old_stty="$(stty -g)"
-    stty -icanon raw -echo min 0 time "$timeout" ignbrk -brkint -ixon isig
+    # shellcheck disable=SC2006
+    old_stty="`stty -g`"
+    stty -icanon -echo min 0 time "$timeout"
 
-    read -r key
+    read key
 
     # shellcheck disable=SC2086
     stty $old_stty
 
-    field=$(printf "%s\n%s\n" "$key" "$field" | handle_keypress)
+    # shellcheck disable=SC2006,SC2154
+    field=`printf "%s\n%s\n" "$key" "$field" | handle_keypress`
 done
 echo "Game Over"
