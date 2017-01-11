@@ -1,5 +1,5 @@
 # sfb
-`sfb` -- Flappy Bird clone written in GNU sed.
+`sfb` -- Flappy Bird clone written in sed.
 
 ![screenshot](https://raw.githubusercontent.com/ValeriyKr/sfb/master/screenshot.png)
 
@@ -15,7 +15,7 @@ Implemented:
 
 Not implemented:
  * Level randomization;
- * Background music (?)
+ * Background music.
 
 ---
 ### How to play
@@ -34,11 +34,3 @@ You should choose one when you start playing by passing it as a command-line arg
  * `full` is the prettiest.
    It is recommended for default playing.
 
----
-Problems:
- * Colorized version lags on Solaris (network connection?)
-   
-   Fixed with double buffering.
- * OS X users have a problem with playing because they doesn't have GNU sed.
-   
-   [Discussion](https://github.com/ValeriyKr/sfb/issues/3)
